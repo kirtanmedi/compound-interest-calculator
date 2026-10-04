@@ -58,6 +58,17 @@ Optional env vars: `STACK_NAME`, `AWS_REGION` (default `us-east-1`), `AWS_PROFIL
 
 At personal or small-team traffic this sits inside CloudFront's free tier, and S3 storage is well under 1 MB. Caching is set up to keep it that way: hashed assets are cached for a year, `index.html` is revalidated on each load, and query strings are excluded from the cache key so every shared scenario link hits the same cached page. `PriceClass_100` (North America and Europe edges) keeps the per-request price at the lowest tier.
 
+### Cost alert
+
+`infra/budget.yaml` is a free, account-wide AWS Budget that emails you when spend is forecast to go over, or actually goes over, a monthly limit (default $1, measured before credits). It's a separate stack, so `npm run destroy` leaves it in place.
+
+```sh
+aws cloudformation deploy --region us-east-1 --stack-name account-cost-alert \
+  --template-file infra/budget.yaml --parameter-overrides AlertEmail=you@example.com
+```
+
+Remove it with `aws cloudformation delete-stack --region us-east-1 --stack-name account-cost-alert`.
+
 ### Teardown
 
 ```sh
