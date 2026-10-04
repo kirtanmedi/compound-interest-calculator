@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Account-wide monthly cost alert. Emails when forecasted or actual spend exceeds the
+  limit. Lives in its own stack so tearing down the site never removes the alert.
+
+Metadata:
+  AWSToolsMetrics:
+    AWSAgentToolkit: aws-cloudformation@3
+
+Parameters:
+  AlertEmail:
+    Type: String
+    Description: Address that receives budget alerts (no confirmation step needed).
+    AllowedPattern: '^[^@\s]+@[^@\s]+\.[^@\s]+$'
+  MonthlyLimitUsd:
+    Type: Number
+    Default: 1
+    MinValue: 1
+    Description: Monthly spend, in USD, that triggers the alerts.
+
+Resources:
+  # Monitoring-only budgets (no Budget Actions) are free. Budgets evaluate about once a
+  # day, so an alert can lag spend by up to 24 hours.
+  MonthlyCostBudget:
+    Type: AWS::Budgets::Budget
+    Properties:
+      Budget:
+        BudgetName: !Sub '${AWS::StackName}-monthly'
+        BudgetType: COST
+        TimeUnit: MONTHLY
+        BudgetLimit:
+          Amount: !Ref MonthlyLimitUsd
+          Unit: USD
+        # Measure usage before credits: with credits netted out, spend reads $0 and the
+        # alert would never fire while credits are being consumed.
+        CostTypes:
+          IncludeCredit: false
+          IncludeRefund: false
+      NotificationsWithSubscribers:
+        # Early warning: AWS projects this month will end above the limit.
+        - Notification:
+            NotificationType: FORECASTED
+            ComparisonOperator: GREATER_THAN
+            Threshold: 100
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: !Ref AlertEmail
+        # Spend has actually passed the limit.
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: 100
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: !Ref AlertEmail
+
+Outputs:
+  BudgetName:
+    Value: !Sub '${AWS::StackName}-monthly'
