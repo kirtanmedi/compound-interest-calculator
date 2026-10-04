@@ -1,8 +1,8 @@
 # compound-interest-calculator
 
-A fast, dark, dashboard-style compound interest calculator. Everything runs in the browser, so it's hosted as a static site on S3 + CloudFront for effectively $0.
+A fast, dark, dashboard-style compound interest calculator. Everything runs in the browser, so it's hosted as a free static site on GitHub Pages.
 
-**Live:** https://d1qmkqej9ech24.cloudfront.net
+**Live:** https://kirtanmedi.github.io/compound-interest-calculator/
 
 ## Features
 
@@ -38,7 +38,13 @@ Code layout:
 
 **Math note:** when compounding and contribution frequencies differ, interest is applied each contribution period at the rate equivalent to the effective annual rate. When the two frequencies match, the results equal the textbook formulas exactly (the tests check this against the closed-form annuity formulas).
 
-## Deploying to AWS
+## Hosting
+
+GitHub Pages is the live host. `.github/workflows/pages.yml` runs the tests, builds with the `/compound-interest-calculator/` base path and publishes `dist/` on every push to `main` (Settings → Pages → Source must be **GitHub Actions**).
+
+## Deploying to AWS (optional)
+
+An S3 + CloudFront setup is also included. It isn't currently deployed; `npm run deploy` stands it back up (with a new CloudFront URL).
 
 Prerequisites: the [AWS CLI](https://aws.amazon.com/cli/) with credentials configured (`aws configure`).
 
