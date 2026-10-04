@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "deploy": "./scripts/deploy.sh"
+    "deploy": "./scripts/deploy.sh",
+    "destroy": "./scripts/destroy.sh"
   },
   "dependencies": {
     "react": "18.3.1",

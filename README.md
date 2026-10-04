@@ -61,7 +61,7 @@ At personal or small-team traffic this sits inside CloudFront's free tier, and S
 ### Teardown
 
 ```sh
-aws s3 rm "s3://$(aws cloudformation describe-stacks --stack-name compound-interest-calculator \
-  --query "Stacks[0].Outputs[?OutputKey=='BucketName'].OutputValue" --output text)" --recursive
-aws cloudformation delete-stack --stack-name compound-interest-calculator
+npm run destroy
 ```
+
+This empties the bucket and deletes the whole stack (bucket, CloudFront distribution, access control and bucket policy), leaving nothing behind. CloudFront takes about 5–15 minutes to delete.

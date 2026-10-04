@@ -3,6 +3,10 @@ Description: >-
   Compound interest calculator: private S3 bucket served through CloudFront
   (Origin Access Control). Static site, so there is no compute to pay for.
 
+Metadata:
+  AWSToolsMetrics:
+    AWSAgentToolkit: aws-cloudformation@3
+
 Parameters:
   DomainName:
     Type: String
@@ -19,6 +23,10 @@ Conditions:
   HasDomain: !Not [!Equals [!Ref DomainName, '']]
 
 Resources:
+  # Deliberately minimal to keep cost near $0 and teardown to one command
+  # (scripts/destroy.sh): no versioning, replication, access logging or Retain policy.
+  # The bucket only holds build output that `npm run deploy` can recreate at any time.
+  # It must be emptied before the stack can delete it, which destroy.sh does.
   SiteBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -98,6 +106,7 @@ Resources:
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
+          # Only this distribution may read objects; nothing else has access.
           - Sid: AllowCloudFrontRead
             Effect: Allow
             Principal:
@@ -107,6 +116,16 @@ Resources:
             Condition:
               StringEquals:
                 AWS:SourceArn: !Sub 'arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${Distribution}'
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !GetAtt SiteBucket.Arn
+              - !Sub '${SiteBucket.Arn}/*'
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
 
 Outputs:
   BucketName:
