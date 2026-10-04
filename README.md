@@ -2,6 +2,8 @@
 
 A fast, dark, dashboard-style compound interest calculator. Everything runs in the browser, so it's hosted as a static site on S3 + CloudFront for effectively $0.
 
+**Live:** https://d1qmkqej9ech24.cloudfront.net
+
 ## Features
 
 - **Recurring contributions**: weekly to yearly deposits, made at the start or end of each period, with an optional yearly raise.
